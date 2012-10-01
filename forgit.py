@@ -6,9 +6,12 @@ import sys
 #__all__ = ["mode"]
 
 
-def mode(path='.'):
-    print 'path is {}'.format(path)
-    for path, dirs, files in os.walk(path):
+def mode(repo_path=None):
+    if not repo_path:
+        # default to script execution location
+        repo_path = os.getcwd()
+    print 'path is {}'.format(repo_path)
+    for path, dirs, files in os.walk(repo_path):
         if path.startswith('.git'):
             continue  # ignore the git config directory
         for _file in files:
@@ -24,8 +27,8 @@ def mode(path='.'):
             old mode 100644
             new mode 100755
             '''
-            if tmp.startswith('.'):
-                tmp = tmp[2:]  # if you start with the path '.'
+            if tmp.startswith(repo_path):
+                tmp = tmp[len(repo_path)+1:]
 
             gitout = subprocess.Popen(['git','diff',tmp],\
                 stdout=subprocess.PIPE).communicate()[0]

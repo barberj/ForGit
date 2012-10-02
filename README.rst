@@ -14,4 +14,4 @@ in filemode despite my git ignore filemode configuration. ::
     new mode 100755
 
 forgit mode [path to repository]
-    Checkout repository files from index if only change is the filemode.
+    Checkout repository files from index if the only change is the filemode.

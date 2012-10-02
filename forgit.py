@@ -14,12 +14,10 @@ def mode(repo_path=None):
     if not repo_path:
         # default to script execution location
         repo_path = os.getcwd()
-    print 'path is {}'.format(repo_path)
+
     for path, dirs, files in os.walk(repo_path):
-        if path.startswith('.git'):
-            continue  # ignore the git config directory
         for _file in files:
-            if _file.endswith('pyc'):
+            if _file.endswith('pyc') or _file == '.git':
                 continue  # skip compiled files
             tmp = os.path.join(path, _file)
             '''

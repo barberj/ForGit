@@ -1,9 +1,7 @@
 from unittest import TestCase
 import forgit
-import sys
 import fudge
 
-_exit = sys.exit
 
 class TestForGit(TestCase):
 

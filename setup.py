@@ -54,7 +54,7 @@ setup(
     version='0.0.1',
     author="Justin Barber",
     author_email="barber.justin@gmail.com",
-    description=("Git Convience Things"),
+    description=("Git Convenience Command Line Tools"),
     long_description=open('README.rst').read(),
     license="MIT",
     keywords="git",
@@ -62,7 +62,8 @@ setup(
     py_modules=["forgit"],
     package_data={'forgit':["README.rst"]},
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
+        "Development Status :: 3 - Alpha",
+        #"Development Status :: 5 - Production/Stable",
         "Topic :: Utilities",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 2.6",

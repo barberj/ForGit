@@ -4,11 +4,10 @@ import re
 import sys
 
 def git_diff(path):
-    return subprocess.Popen(['git','diff', path],\
-        stdout=subprocess.PIPE).communicate()[0]
+    return subprocess.check_output(['git','diff', path])
 
 def git_checkout(path):
-    subprocess.call(['git','checkout', path])
+    return subprocess.check_call(['git','checkout', path])
 
 def mode(repo_path=None):
     if not repo_path:
@@ -16,8 +15,12 @@ def mode(repo_path=None):
         repo_path = os.getcwd()
 
     for path, dirs, files in os.walk(repo_path):
+
+        if path.startswith('.git') or path.endswith('.git'):
+            continue  # ignore the git config directory
+
         for _file in files:
-            if _file.endswith('pyc') or _file == '.git':
+            if _file.endswith('pyc'):
                 continue  # skip compiled files
             tmp = os.path.join(path, _file)
             '''

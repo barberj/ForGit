@@ -9,12 +9,10 @@ class TestForGit(TestCase):
     def test_mode_fully_qualified_path(self, fake_walk, fake_diff, fake_checkout):
 
         def walk():
-            index = 0
-            paths = [('/somepath/somerepo', [], ['.git', 'somemodule.py', 'somemodule.pyc']),
-                ('/somepath/somerepo/somemodule', [], ['.git', 'somemodule.py', 'somemodule.pyc'])]
-            while index < len(paths):
-                yield paths[index]
-                index += 1
+            paths = [('/somepath/somerepo', [], ['somemodule.py', 'somemodule.pyc']),
+                ('/somepath/somerepo/somemodule', [], ['somemodule.py', 'somemodule.pyc'])]
+            for path in paths:
+                yield path
 
         fake_walk.expects_call().with_args('/somepath/somerepo').returns(walk())
 
@@ -30,5 +28,17 @@ class TestForGit(TestCase):
 
         fake_checkout.expects_call().with_args('somemodule.py').\
             next_call().with_args('somemodule/somemodule.py')
+
+        forgit.mode('/somepath/somerepo')
+
+    @fudge.patch('forgit.os.walk')
+    def test_mode_ignores_git_dir(self, fake_walk):
+
+        def walk():
+            paths = [('/somepath/somerepo/.git', [], ['somemodule.py', 'somemodule.pyc'])]
+            for path in paths:
+                yield path
+
+        fake_walk.expects_call().with_args('/somepath/somerepo').returns(walk())
 
         forgit.mode('/somepath/somerepo')

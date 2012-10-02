@@ -41,6 +41,9 @@ def mode(repo_path=None):
             if re_filemode.match(gitout):
                 git_checkout(tmp)
 
+def merged():
+    pass
+
 def handle_command_line():
     if len(sys.argv) == 1:
         # need to add help message.

@@ -16,5 +16,5 @@ in filemode despite my git ignore filemode configuration. ::
 forgit mode [path to repository]
     Checkout repository files from index if the only change is the filemode.
 
-    If the optional path parameter is ommited git status check is performed 
+    If the optional path parameter is omited git status check is performed 
     from current working directory. 

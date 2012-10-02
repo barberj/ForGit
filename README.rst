@@ -6,7 +6,7 @@ A set of git convenience command line tools.
 ----
 
 Due to a hardware malfunction, I had to restore repositories with uncommited
-changes onto fresh hardware. After restore all respository files showed a change
+changes. After restore all respository files showed a change
 in filemode despite my git ignore filemode configuration. ::
     $ git diff setup.py
     diff --git a/setup.py b/setup.py

@@ -3,8 +3,12 @@ import subprocess
 import re
 import sys
 
-#__all__ = ["mode"]
+def git_diff(path):
+    return subprocess.Popen(['git','diff', path],\
+        stdout=subprocess.PIPE).communicate()[0]
 
+def git_checkout(path):
+    subprocess.call(['git','checkout', path])
 
 def mode(repo_path=None):
     if not repo_path:
@@ -30,25 +34,24 @@ def mode(repo_path=None):
             if tmp.startswith(repo_path):
                 tmp = tmp[len(repo_path)+1:]
 
-            gitout = subprocess.Popen(['git','diff',tmp],\
-                stdout=subprocess.PIPE).communicate()[0]
+            gitout = git_diff(tmp)
 
             re_filemode = re.compile('^diff --git a/{0} b/{0}\nold mode \d+\nnew mode \d+\n$'.format(tmp))
             if re_filemode.match(gitout):
-                subprocess.call(['git','checkout',tmp])
+                git_checkout(tmp)
 
 def handle_command_line():
     if len(sys.argv) == 1:
         # need to add help message.
-        print 'HELP'
-        sys.exit(0)
+        print 'Help'
+        return
 
     command = globals().get(sys.argv[1], None)
     args = sys.argv[2:]
 
     if not command:
         print('Unrecognized command')
-        sys.exit(0)
+        return
 
     assert callable(command), '{} is not a callable'.format(command)
     command(*args)

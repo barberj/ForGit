@@ -70,6 +70,7 @@ setup(
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.2",
     ],
+    install_requires=['docopt == 0.5.0'],
     tests_require=test_requirements,
     cmdclass={
         'test': TestCommand,

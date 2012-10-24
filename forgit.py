@@ -2,13 +2,14 @@
 ForGit
 
 Usage:
-    forgit (mode <repo_path>|(merged [--with=<branch>...]))
+    forgit mode [<repo_path>]
+    forgit contained-by [<branch>...]
 
 Options:
     -h, --help
     -v, --version
-    <path>                           Path of repository to ignore filemode changes. [default: None]
-    -w <branch>, --with=<branch>     Specify branch to verify merged. [default: master]
+    <path>              Path of repository to reset filemode changes.
+    <branch>            Branch(es) to verify contained-by. [default: master]
 """
 import os
 import subprocess
@@ -57,11 +58,11 @@ def mode(repo_path=None, **kw):
                 git_checkout(tmp)
 
 
-def merged(**kw):
-    pass
+def contained_by(**kw):
+    print kw
 
 
-def clean(arguments):
+def normalize(arguments):
     del arguments['--version']
     del arguments['--help']
     command = {}
@@ -72,12 +73,14 @@ def clean(arguments):
     If the value of that key is True its the command to execute.
     Delete all other commands.
 
-    Clean up options in the arguments dictionary by removing <> and --.
+    Normalize options in the arguments dictionary by removing <> and --.
     """
+    print arguments
     for k, v in arguments.iteritems():
-        if k in globals():
+        cmd = '_'.join(k.split('-'))
+        if cmd in globals():
             if v:
-                command['command'] = k
+                command['command'] = cmd
         else:
             options[k.lstrip('-').\
                 lstrip('<').rstrip('>')] = v
@@ -87,7 +90,7 @@ def clean(arguments):
 
 
 def handle_command_line():
-    arguments = clean(docopt(__doc__, version='ForGit 0.0.1'))
+    arguments = normalize(docopt(__doc__, version='ForGit 0.0.1'))
     command = globals().get(arguments['command'])
 
     if not command:

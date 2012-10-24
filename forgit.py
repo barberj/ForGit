@@ -87,7 +87,7 @@ def clean(arguments):
 
 
 def handle_command_line():
-    arguments = clean(docopt(__doc__, version='ForGit 1.0'))
+    arguments = clean(docopt(__doc__, version='ForGit 0.0.1'))
     command = globals().get(arguments['command'])
 
     if not command:

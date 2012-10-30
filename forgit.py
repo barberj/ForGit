@@ -59,7 +59,7 @@ def mode(repo_path=None, **kw):
 
 
 def contained_by(**kw):
-    print kw
+    pass
 
 
 def normalize(arguments):
@@ -75,7 +75,6 @@ def normalize(arguments):
 
     Normalize options in the arguments dictionary by removing <> and --.
     """
-    print arguments
     for k, v in arguments.iteritems():
         cmd = '_'.join(k.split('-'))
         if cmd in globals():

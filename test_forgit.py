@@ -13,6 +13,7 @@ class TestCLI(TestCase):
         sys.argv = ['forgit', 'unknown']
         try:
             forgit.handle_command_line()
+            assert False, 'Failed to raise DocoptExit'
         except DocoptExit as de:
             assert de.args[0] == 'Usage:\n'\
                             '    forgit mode [<repo_path>]\n'\

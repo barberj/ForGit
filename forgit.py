@@ -3,18 +3,23 @@ ForGit
 
 Usage:
     forgit mode [<repo_path>]
-    forgit contained-by [<branch>...]
+    forgit contained-by [<branches>...]
 
 Options:
     -h, --help
     -v, --version
     <path>              Path of repository to reset filemode changes.
-    <branch>            Branch(es) to verify contained-by. [default: master]
+    <branches>          Branches to verify contained-by. [default: master]
 """
 import os
 import subprocess
 import re
+import sys
 from docopt import docopt
+
+
+def git_verbose_branch_listing(branch):
+    return subprocess.check_output(['git','branch', '--list', '-v', '--no-abbrev', branch])
 
 
 def git_diff(path):
@@ -26,6 +31,10 @@ def git_checkout(path):
 
 
 def mode(repo_path=None, **kw):
+    """
+    Forget all filemode changes.
+    """
+
     if not repo_path:
         # default to script execution location
         repo_path = os.getcwd()
@@ -59,7 +68,28 @@ def mode(repo_path=None, **kw):
 
 
 def contained_by(**kw):
-    pass
+    """
+    Forget all topic branches contained by branches argument.
+
+    In reality this is the inverse of no-merged.
+    """
+
+    branches = kw.get('branches')
+    if not branches:
+        raise SystemExit('Missing the name of an existing branch to find branches which are not fully contained.\nUsuage:\n\tforgit contained-by [<branch>...]')
+    commits = set()
+    for branch in branches:
+        branch_listing = git_verbose_branch_listing(branch)
+        if not branch_listing:
+            raise SystemExit('Invalid existing branch name.\nUsuage:\n\tforgit contained-by [<branch>...]')
+        # if branch to verify contained-by is currently checked out
+        # it will include an asterisk in the listing.
+        # remove the asterisk so our access by index is correct.
+        branch_listing = branch_listing.split()
+        if '*' in branch_listing:
+            branch_listing.remove('*')
+        commits.add(branch_listing[1])
+    print commits
 
 
 def normalize(arguments):
@@ -89,7 +119,7 @@ def normalize(arguments):
 
 
 def handle_command_line():
-    arguments = normalize(docopt(__doc__, version='ForGit 0.0.1'))
+    arguments = normalize(docopt(__doc__, sys.argv[1:], version='ForGit 0.0.1'))
     command = globals().get(arguments['command'])
 
     if not command:

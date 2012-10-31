@@ -17,7 +17,7 @@ class TestCLI(TestCase):
         except DocoptExit as de:
             assert de.args[0] == 'Usage:\n'\
                             '    forgit mode [<repo_path>]\n'\
-                            '    forgit contained-by [<branch>...]'
+                            '    forgit contained-by [<branches>...]'
 
     @fudge.patch('forgit.contained_by')
     def test_contained_by_called(self, fake_forgit):
@@ -38,7 +38,7 @@ class TestCLI(TestCase):
 
         sys.argv = ['forgit', 'mode', '/path/repo']
         fake_forgit.expects_call().with_args(
-            command='mode', branch=[], repo_path='/path/repo').returns(True)
+            command='mode', branches=[], repo_path='/path/repo').returns(True)
         forgit.handle_command_line()
 
 

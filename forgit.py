@@ -19,7 +19,16 @@ from docopt import docopt
 
 
 def git_verbose_branch_listing(branch):
-    return subprocess.check_output(['git','branch', '--list', '-v', '--no-abbrev', branch])
+    branch_listing = subprocess.check_output(['git','branch', '--list', '-v', '--no-abbrev', branch])
+    if not branch_listing:
+        raise SystemExit('Invalid existing branch name.\nUsuage:\n\tforgit contained-by [<branch>...]')
+    # if branch to verify contained-by is currently checked out
+    # it will include an asterisk in the listing.
+    # remove the asterisk so our access by index is correct.
+    branch_listing = branch_listing.split()
+    if '*' in branch_listing:
+        branch_listing.remove('*')
+    return branch_listing
 
 
 def git_diff(path):
@@ -28,6 +37,10 @@ def git_diff(path):
 
 def git_checkout(path):
     return subprocess.check_call(['git','checkout', path])
+
+
+def git_merged(commit):
+    return subprocess.check_output(['git','branch','--merged', commit]).split()
 
 
 def mode(repo_path=None, **kw):
@@ -76,21 +89,15 @@ def contained_by(**kw):
 
     branches = kw.get('branches')
     if not branches:
-        raise SystemExit('Missing the name of an existing branch to find branches which are not fully contained.\nUsuage:\n\tforgit contained-by [<branch>...]')
-    commits = set()
-    for branch in branches:
-        branch_listing = git_verbose_branch_listing(branch)
-        if not branch_listing:
-            raise SystemExit('Invalid existing branch name.\nUsuage:\n\tforgit contained-by [<branch>...]')
-        # if branch to verify contained-by is currently checked out
-        # it will include an asterisk in the listing.
-        # remove the asterisk so our access by index is correct.
-        branch_listing = branch_listing.split()
-        if '*' in branch_listing:
-            branch_listing.remove('*')
-        commits.add(branch_listing[1])
-    print commits
+        raise SystemExit('Missing the name of an existing branch to find branches '
+            'which are not fully contained.\nUsuage:\n\tforgit contained-by [<branch>...]')
 
+    merged = set()
+    for branch in branches:
+        commit = git_verbose_branch_listing(branch)[1]
+        merged_branches = git_merged(commit)
+        map(merged.add, merged_branches)
+    map(merged.discard, branches)
 
 def normalize(arguments):
     del arguments['--version']

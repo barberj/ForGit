@@ -81,3 +81,10 @@ class TestMode(TestCase):
         fake_walk.expects_call().with_args('/somepath/somerepo').returns(walk())
 
         forgit.mode('/somepath/somerepo')
+
+
+class TestContained(TestCase):
+
+    fudge.patch('forgit.subprocess.checkoutput')
+    def test_git_merged(self, fake_c):
+        pass

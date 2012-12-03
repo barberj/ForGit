@@ -50,7 +50,7 @@ class TestCommand(test):
 
 
 setup(
-    name="ForGit",
+    name="forgit",
     version='0.0.1',
     author="Justin Barber",
     author_email="barber.justin@gmail.com",

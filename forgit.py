@@ -1,5 +1,5 @@
 """
-ForGit
+forgit
 
 Usage:
     forgit mode [<repo_path>]
@@ -40,7 +40,15 @@ def git_checkout(path):
 
 
 def git_merged(commit):
-    return subprocess.check_output(['git','branch','--merged', commit]).split()
+    branches = subprocess.check_output(['git','branch','--merged', commit]).split()
+    # remove the * which denotes current branch
+    if '*' in branches: branches.remove('*')
+    return branches
+
+
+def delete_branches(branches):
+    for branch in branches:
+        print('Deleteing {}'.format(branch))
 
 
 def mode(repo_path=None, **kw):
@@ -92,12 +100,26 @@ def contained_by(**kw):
         raise SystemExit('Missing the name of an existing branch to find branches '
             'which are not fully contained.\nUsuage:\n\tforgit contained-by [<branch>...]')
 
-    merged = set()
+    # gather branches contained by commit
+    merged = {}
     for branch in branches:
         commit = git_verbose_branch_listing(branch)[1]
-        merged_branches = git_merged(commit)
-        map(merged.add, merged_branches)
-    map(merged.discard, branches)
+        merged[commit] = git_merged(commit)
+
+    # we only want to prune items contained by all the branches.
+    # so we need to gather all the merged branches
+    # and find the ones common to all.
+    prune = None
+    for commit, merged_branches in merged.iteritems():
+        # if nothing to prune set current merged branches to be pruned
+        if not prune: prune = set(merged_branches)
+
+        # safe to do this regardless of previous conditional
+        # b/c it will be intersecting the same set
+        prune = prune & set(merged_branches)
+
+    map(prune.discard, branches)
+    delete_branches(prune)
 
 def normalize(arguments):
     del arguments['--version']
@@ -126,9 +148,10 @@ def normalize(arguments):
 
 
 def handle_command_line():
-    arguments = normalize(docopt(__doc__, sys.argv[1:], version='ForGit 0.0.1'))
+    arguments = normalize(docopt(__doc__, sys.argv[1:], version='forgit 0.0.1'))
     command = globals().get(arguments['command'])
 
+    print arguments
     if not command:
         print('Unrecognized command')
 

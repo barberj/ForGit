@@ -26,8 +26,7 @@ def git_verbose_branch_listing(branch):
     # it will include an asterisk in the listing.
     # remove the asterisk so our access by index is correct.
     branch_listing = branch_listing.split()
-    if '*' in branch_listing:
-        branch_listing.remove('*')
+    if '*' in branch_listing: branch_listing.remove('*')
     return branch_listing
 
 
@@ -109,7 +108,7 @@ def contained_by(**kw):
     # we only want to prune items contained by all the branches.
     # so we need to gather all the merged branches
     # and find the ones common to all.
-    prune = None
+    prune = set()
     for commit, merged_branches in merged.iteritems():
         # if nothing to prune set current merged branches to be pruned
         if not prune: prune = set(merged_branches)
@@ -151,7 +150,6 @@ def handle_command_line():
     arguments = normalize(docopt(__doc__, sys.argv[1:], version='forgit 0.0.1'))
     command = globals().get(arguments['command'])
 
-    print arguments
     if not command:
         print('Unrecognized command')
 

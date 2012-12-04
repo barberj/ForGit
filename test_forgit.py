@@ -85,6 +85,106 @@ class TestMode(TestCase):
 
 class TestContained(TestCase):
 
-    fudge.patch('forgit.subprocess.checkoutput')
-    def test_git_merged(self, fake_c):
-        pass
+    @fudge.patch('forgit.subprocess.check_output')
+    def test_git_merged(self, fake_p):
+        """
+        Find the branches containing the commit.
+
+        Verify * denoting current branch is removed.
+        """
+        # find branches containing the commit
+        fake_p.expects_call().returns(
+            '* master\n'\
+            '  stage\n'\
+            '  feature_branch\n'\
+            '  feature_two_branch\n'
+        )
+
+        assert ['master', 'stage', 'feature_branch', 'feature_two_branch'] == forgit.git_merged('somecommit')
+
+    @fudge.patch('forgit.subprocess.check_output')
+    def test_git_verbose_branch_listing(self, fake_p):
+        """
+        Find the branches commit hash.
+
+        Verify * denoting current branch is removed.
+        """
+        # find branches containing the commit
+        fake_p.expects_call().returns(
+            ' master fe942c68f40bc162746885a07ff4e40d6eeace7f 0.0.1 some feature commit message'
+        )
+
+        assert ['master','fe942c68f40bc162746885a07ff4e40d6eeace7f','0.0.1','some','feature','commit','message'] ==\
+             forgit.git_merged('somecommit')
+
+    @fudge.patch('forgit.subprocess.check_output',
+        'forgit.delete_branches')
+    def test_contained_by_prunes_nothing(self, fake_p, fake_d):
+        """
+        Verify nothing is merged with passed branch,
+        therefore nothing is pruned.
+        """
+        # first call is to get branch commit
+        # 2nd call is to find branches containing the commit
+        fake_p.expects_call().returns(
+            ' master fe942c68f40bc162746885a07ff4e40d6eeace7f 0.0.1 some feature commit message'
+        ).next_call().returns(
+            '* master\n'
+        )
+
+        fake_d.expects_call().with_args(set())
+        sys.argv = ['forgit', 'contained-by', 'master']
+        forgit.handle_command_line()
+
+    @fudge.patch('forgit.subprocess.check_output',
+        'forgit.delete_branches')
+    def test_prune_contained_by(self, fake_p, fake_d):
+        """
+        Verify nothing is merged with passed branch,
+        therefore nothing is pruned.
+        """
+        # first call is to get branch commit
+        # 2nd call is to find branches containing the commit
+        fake_p.expects_call().returns(
+            ' master fe942c68f40bc162746885a07ff4e40d6eeace7f 0.0.1 some feature commit message'
+        ).next_call().returns(
+            '* master\n'\
+            ' stage\n'\
+            ' feature_branch\n'\
+            ' feature_two_branch\n'
+        )
+
+        fake_d.expects_call().with_args(set(['stage', 'feature_branch', 'feature_two_branch']))
+        sys.argv = ['forgit', 'contained-by', 'master']
+        forgit.handle_command_line()
+
+    @fudge.patch('forgit.subprocess.check_output',
+        'forgit.delete_branches')
+    def test_prune_intersecting_contained_by(self, fake_p, fake_d):
+        """
+        Verify nothing is merged with passed branch,
+        therefore nothing is pruned.
+        """
+        # first call is to get branch commit
+        # 2nd call is to find branches containing the commit
+        fake_p.expects_call().returns(
+            '* master 123456 0.0.1 some feature commit message'
+        ).next_call().returns(
+            '* master\n'\
+            ' stage\n'\
+            ' feature_branch\n'\
+            ' feature_two_branch\n'\
+            ' feature_three_branch\n'
+        ).next_call().returns(
+            ' stage 654321 0.0.1 some feature commit message'
+        ).next_call().returns(
+            '* master\n'\
+            ' stage\n'\
+            ' feature_branch\n'\
+            ' feature_two_branch\n'\
+            ' feature_four_branch\n'
+        )
+
+        fake_d.expects_call().with_args(set(['feature_branch', 'feature_two_branch']))
+        sys.argv = ['forgit', 'contained-by', 'master', 'stage']
+        forgit.handle_command_line()

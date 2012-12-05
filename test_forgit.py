@@ -160,7 +160,7 @@ class TestContained(TestCase):
 
     @fudge.patch('forgit.subprocess.check_output',
         'forgit.delete_branches')
-    def test_prune_intersecting_contained_by(self, fake_p, fake_d):
+    def test_prune_contained_by_intersection(self, fake_p, fake_d):
         """
         Verify nothing is merged with passed branch,
         therefore nothing is pruned.

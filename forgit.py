@@ -45,9 +45,23 @@ def git_merged(commit):
     return branches
 
 
+def hook(branch):
+    import requests
+    rsp = requests.get('https://jira.pictage.com/browse/SQ-989', verify=False)
+    if 'Closed - The issue is considered finished, the resolution is correct. Issues which are closed can be reopened.' in rsp.text:
+        return True
+    return False
+
+
+def git_prune(branch):
+    # need to
+    subprocess.check_call(['git', 'branch', '-d', branch])
+    subprocess.check_call(['git', 'push', 'origin', ':{}'.format(branch)])
+
+
 def delete_branches(branches):
     for branch in branches:
-        print('Deleteing {}'.format(branch))
+        git_prune(branch)
 
 
 def mode(repo_path=None, **kw):

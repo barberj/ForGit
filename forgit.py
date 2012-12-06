@@ -53,14 +53,19 @@ def git_merged(commit):
 
 def git_prune(branch):
     if prune_hook(branch):
-        print 'Pruning branch {}'.format(branch)
-        #subprocess.check_call(['git', 'branch', '-d', branch])
-        #subprocess.check_call(['git', 'push', 'origin', ':{}'.format(branch)])
+        subprocess.check_call(['git', 'branch', '-d', branch])
+        subprocess.check_call(['git', 'push', 'origin', ':{}'.format(branch)])
+        return True
+    return False
 
 
 def delete_branches(branches):
+    deleted = []
     for branch in branches:
-        git_prune(branch)
+        pruned = git_prune(branch)
+        if pruned:
+            deleted.append(branch)
+    print('Deleted branches: {}'.format(', '.join(deleted)))
 
 
 def mode(repo_path=None, **kw):

@@ -17,6 +17,11 @@ import subprocess
 import re
 import sys
 from docopt import docopt
+import configit
+
+
+# this can be overwritten if there is a configuration file
+def prune_hook(branch): return True
 
 
 def git_verbose_branch_listing(branch):
@@ -46,18 +51,11 @@ def git_merged(commit):
     return branches
 
 
-def hook(branch):
-    import requests
-    rsp = requests.get('https://jira.pictage.com/browse/SQ-989', verify=False)
-    if 'Closed - The issue is considered finished, the resolution is correct. Issues which are closed can be reopened.' in rsp.text:
-        return True
-    return False
-
-
 def git_prune(branch):
-    # need to
-    subprocess.check_call(['git', 'branch', '-d', branch])
-    subprocess.check_call(['git', 'push', 'origin', ':{}'.format(branch)])
+    if prune_hook(branch):
+        print 'Pruning branch {}'.format(branch)
+        #subprocess.check_call(['git', 'branch', '-d', branch])
+        #subprocess.check_call(['git', 'push', 'origin', ':{}'.format(branch)])
 
 
 def delete_branches(branches):
@@ -161,12 +159,28 @@ def normalize(arguments):
     return command
 
 
+def load_config(config):
+    # default configuration loaded from user home directory
+    if config == '.forgitrc':
+        config = os.path.expanduser('~/.forgitrc')
+
+    if not os.path.exists(config):
+        print('[WARNING] Unable to load configuration file {}'.format(config))
+        return
+    config = configit.from_file(config)
+    globals().update(config)
+
+
 def handle_command_line():
     arguments = normalize(docopt(__doc__, sys.argv[1:], version='forgit 0.0.1'))
     command = globals().get(arguments['command'])
 
     if not command:
         print('Unrecognized command')
+
+    config = arguments['config']
+    del arguments['config']
+    load_config(config)
 
     assert callable(command), '{} is not a callable'.format(command)
     command(**arguments)

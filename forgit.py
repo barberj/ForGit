@@ -3,13 +3,14 @@ forgit
 
 Usage:
     forgit mode [<repo_path>]
-    forgit contained-by [<branches>...]
+    forgit contained-by [<branches>...] [-c <config>]
 
 Options:
     -h, --help
     -v, --version
-    <path>              Path of repository to reset filemode changes.
-    <branches>          Branches to verify contained-by. [default: master]
+    -c <config>, --config <config>    forgit resource configuration file. [default: .forgitrc]
+    <path>                          Path of repository to reset filemode changes.
+    <branches>                      Branches to verify contained-by. [default: master]
 """
 import os
 import subprocess

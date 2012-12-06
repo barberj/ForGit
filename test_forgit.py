@@ -9,7 +9,6 @@ from docopt import DocoptExit
 class TestCLI(TestCase):
 
     def test_unknown_command(self):
-
         sys.argv = ['forgit', 'unknown']
         try:
             forgit.handle_command_line()
@@ -17,28 +16,39 @@ class TestCLI(TestCase):
         except DocoptExit as de:
             assert de.args[0] == 'Usage:\n'\
                             '    forgit mode [<repo_path>]\n'\
-                            '    forgit contained-by [<branches>...]'
+                            '    forgit contained-by [<branches>...] [-c <config>]'
 
     @fudge.patch('forgit.contained_by')
     def test_contained_by_called(self, fake_forgit):
-
         sys.argv = ['forgit', 'contained-by']
         fake_forgit.expects_call().returns(True)
         forgit.handle_command_line()
 
     @fudge.patch('forgit.mode')
     def test_mode_called(self, fake_forgit):
-
         sys.argv = ['forgit', 'mode']
         fake_forgit.expects_call().returns(True)
         forgit.handle_command_line()
 
     @fudge.patch('forgit.mode')
     def test_mode_called_with_repo_path(self, fake_forgit):
-
         sys.argv = ['forgit', 'mode', '/path/repo']
         fake_forgit.expects_call().with_args(
-            command='mode', branches=[], repo_path='/path/repo').returns(True)
+            command='mode', config='.forgitrc', branches=[], repo_path='/path/repo').returns(True)
+        forgit.handle_command_line()
+
+    @fudge.patch('forgit.contained_by')
+    def test_called_with_config_file(self, fake_forgit):
+        sys.argv = ['forgit', 'contained-by', '-c', 'local.py']
+        fake_forgit.expects_call().with_args(
+            command='contained_by', config='local.py', branches=[], repo_path=None).returns(True)
+        forgit.handle_command_line()
+
+    @fudge.patch('forgit.contained_by')
+    def test_called_with_branches(self, fake_forgit):
+        sys.argv = ['forgit', 'contained-by', 'master', 'stage', '-c', 'local.py']
+        fake_forgit.expects_call().with_args(
+            command='contained_by', config='local.py', branches=['master', 'stage'], repo_path=None).returns(True)
         forgit.handle_command_line()
 
 
